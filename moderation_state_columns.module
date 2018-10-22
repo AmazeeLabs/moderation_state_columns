@@ -65,21 +65,3 @@ function template_preprocess_views_view_moderation_state_columns(&$variables) {
   ];
   $variables['#attached']['library'][] =  'moderation_state_columns/view_display';
 }
-
-// DONE: Add a param to the serve method for the host to look for.
-
-// DONE: Add a param to the serve method to pass arbitrary params to webpack-dev-server.
-
-// DONE: Add a yarn command that starts the dev server in lagoon setup.
-
-// TODO: Push webpack to drupal.org and see if the tests pass.
-
-// TODO: Fix the bug with  $BRANCH whe on a tagged commit.
-
-// TODO: Review the code.
-
-// TODO: Add a separate drupal project for moderation_state_columns.
-
-// TODO: Send a PR to silverback to require moderation state columns.
-
-// TODO: Send a PR to silverback to require webpack_react (with a package.json).
