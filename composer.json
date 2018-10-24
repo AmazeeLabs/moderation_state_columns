@@ -10,5 +10,8 @@
     "issues": "https://www.drupal.org/project/issues/moderation_state_columns",
     "source": "http://cgit.drupalcode.org/moderation_state_columns"
   },
-  "require": { }
+  "require": {
+    "drupal/webpack_react": "*",
+    "ext-json": "*"
+  }
 }

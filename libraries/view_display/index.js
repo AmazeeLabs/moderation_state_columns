@@ -6,16 +6,10 @@ import Display from './Display';
 
   Drupal.behaviors.moderation_state_columns_view_display = {
     attach: function (context, settings) {
-      if (!settings.moderationStateColumns) {
-        return;
-      }
-
-      Object.keys(settings.moderationStateColumns).forEach(domId => {
-        $(`.js-view-dom-id-${domId} .moderation-state-columns--component-container`, context)
-          .each(function () {
-            const { entities, states } = settings.moderationStateColumns[domId];
-            ReactDOM.render(<Display entities={entities} states={states} />, this);
-          });
+      $('.moderation-state-columns--component-container .moderation-state-columns--json-content', context).each(function () {
+        const { entities, states } = JSON.parse($(this).text());
+        ReactDOM.render(<Display entities={entities} states={states} />, $(this).parent().get(0));
+        $(this).remove();
       });
     }
   };

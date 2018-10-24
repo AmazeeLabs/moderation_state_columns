@@ -5,6 +5,7 @@
  * Contains moderation_state_columns.module.
  */
 
+use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\workflows\Entity\Workflow;
@@ -27,21 +28,25 @@ function moderation_state_columns_help($route_name, RouteMatchInterface $route_m
  * Preprocess hook for the moderation_state_columns views style.
  */
 function template_preprocess_views_view_moderation_state_columns(&$variables) {
-  // TODO: Make it work with ajax views.
-
-  $states = [];
   $entities = [];
+  $states = [];
   /** @var \Drupal\content_moderation\ModerationInformationInterface $moderationInformation */
   $moderationInformation = \Drupal::service('content_moderation.moderation_information');
   /** @var \Drupal\views\ViewExecutable $view */
   $view = $variables['view'];
-  $options = $view->style_plugin->options;
   /** @var \Drupal\workflows\Entity\Workflow $workflow */
-  $workflow = Workflow::load($options['workflow']);
+  $workflow = Workflow::load($view->style_plugin->options['workflow']);
 
-  foreach ($workflow->get('type_settings')['states'] as $id => $state) {
+  $stateDefinitions = $workflow->get('type_settings')['states'];
+  uasort($stateDefinitions, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
+  foreach ($stateDefinitions as $id => $state) {
     $states[$id] = $state['label'];
   }
+
+  if (!isset($variables['#cache']['tags'])) {
+    $variables['#cache']['tags'] = [];
+  }
+  $variables['#cache']['tags'] = array_merge($variables['#cache']['tags'], $workflow->getCacheTags());
 
   foreach ($variables['rows'] as $row) {
     $entity = NULL;
@@ -54,14 +59,15 @@ function template_preprocess_views_view_moderation_state_columns(&$variables) {
       // No moderated entity found in the results. Ignore this row.
       continue;
     }
+    $variables['#cache']['tags'] = array_merge($variables['#cache']['tags'], $entity->getCacheTags());
     $state = $entity->get('moderation_state')->value;
     $entities[$state][] = render($row);
   }
 
-  // Update options for twig.
-  $variables['#attached']['drupalSettings']['moderationStateColumns'][$view->dom_id] = [
+  $variables['json_encoded_content'] = json_encode([
     'states' => $states,
     'entities' => $entities,
-  ];
+  ]);
+
   $variables['#attached']['library'][] =  'moderation_state_columns/view_display';
 }
