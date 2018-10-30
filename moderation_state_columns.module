@@ -59,6 +59,11 @@ function template_preprocess_views_view_moderation_state_columns(&$variables) {
       // No moderated entity found in the results. Ignore this row.
       continue;
     }
+    $entityWorkflow = $moderationInformation->getWorkflowForEntity($entity);
+    if (!$entityWorkflow || $entityWorkflow->id() != $workflow->id()) {
+      // The entity is not managed by the chosen workflow.
+      continue;
+    }
     $variables['#cache']['tags'] = array_merge($variables['#cache']['tags'], $entity->getCacheTags());
     $state = $entity->get('moderation_state')->value;
     $entities[$state][] = render($row);
