@@ -67,6 +67,7 @@ class ModerationStateColumns extends StylePluginBase {
       '#title' => $this->t('Workflow'),
       '#description' => $this->t('The workflow to use.'),
       '#options' => $workflows,
+      '#default_value' => $this->options['workflow'],
     ];
   }
 
