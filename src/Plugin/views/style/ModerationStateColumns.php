@@ -41,11 +41,30 @@ class ModerationStateColumns extends StylePluginBase {
   protected $usesRowClass = TRUE;
 
   /**
+   * Returns the workflow states as options.
+   *
+   * @param \Drupal\workflows\Entity\Workflow $workflow
+   *   The workflow entity.
+   *
+   * @return array
+   */
+  public static function getWorkflowStatesOptions(Workflow $workflow) {
+    $options = [];
+    $stateDefinitions = $workflow->get('type_settings')['states'];
+    uasort($stateDefinitions, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
+    foreach ($stateDefinitions as $id => $state) {
+      $options[$id] = $state['label'];
+    }
+    return $options;
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
     $options['workflow'] = array('default' => '');
+    $options['states'] = array('default' => '');
     return $options;
   }
 
@@ -68,7 +87,51 @@ class ModerationStateColumns extends StylePluginBase {
       '#description' => $this->t('The workflow to use.'),
       '#options' => $workflows,
       '#default_value' => $this->options['workflow'],
+      '#ajax' => [
+        'callback' => [get_called_class(), 'updateStates'],
+        'wrapper' => 'moderation-state-columns-states',
+      ],
     ];
+
+    $workflowId = NULL;
+    $currentStateOptions = $form_state->getValue('style_options');
+    if (!empty($currentStateOptions)) {
+      $workflowId  = $currentStateOptions['workflow'];
+    } else {
+      $workflowId = $this->options['workflow'];
+    }
+
+    $form['states'] = [
+      '#prefix' => '<div id="moderation-state-columns-states">',
+      '#suffix' => '</div>',
+    ];
+
+    if (!empty($workflowId)) {
+      $workflow = Workflow::load($workflowId);
+      $states = $currentStateOptions['states'] ? $currentStateOptions['states'] : $this->options['states'];
+      $form['states'] += [
+        '#title' => $this->t('States'),
+        '#description' => $this->t('Only show columns for the states chosen here. <strong>The filters should still be added to the view.</strong>'),
+        '#type' => 'select',
+        '#multiple' => TRUE,
+        '#options' => self::getWorkflowStatesOptions($workflow),
+        '#default_value' => $states,
+      ];
+    } else {
+      $form['states']['#type'] = 'hidden';
+    }
+  }
+
+  /**
+   * Ajax callback that triggers when the workflow changes.
+   *
+   * @param array $form
+   * @param \Drupal\core\form\FormStateInterface $form_state
+   *
+   * @return array
+   */
+  public static function updateStates(array &$form, FormStateInterface $form_state) : array {
+    return $form['options']['style_options']['states'];
   }
 
 }

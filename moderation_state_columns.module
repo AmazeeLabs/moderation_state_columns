@@ -8,6 +8,7 @@
 use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\moderation_state_columns\Plugin\views\style\ModerationStateColumns;
 use Drupal\workflows\Entity\Workflow;
 
 /**
@@ -29,19 +30,13 @@ function moderation_state_columns_help($route_name, RouteMatchInterface $route_m
  */
 function template_preprocess_views_view_moderation_state_columns(&$variables) {
   $entities = [];
-  $states = [];
   /** @var \Drupal\content_moderation\ModerationInformationInterface $moderationInformation */
   $moderationInformation = \Drupal::service('content_moderation.moderation_information');
   /** @var \Drupal\views\ViewExecutable $view */
   $view = $variables['view'];
   /** @var \Drupal\workflows\Entity\Workflow $workflow */
   $workflow = Workflow::load($view->style_plugin->options['workflow']);
-
-  $stateDefinitions = $workflow->get('type_settings')['states'];
-  uasort($stateDefinitions, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
-  foreach ($stateDefinitions as $id => $state) {
-    $states[$id] = $state['label'];
-  }
+  $states = array_intersect_key(ModerationStateColumns::getWorkflowStatesOptions($workflow), $view->style_plugin->options['states']);
 
   if (!isset($variables['#cache']['tags'])) {
     $variables['#cache']['tags'] = [];
@@ -64,13 +59,18 @@ function template_preprocess_views_view_moderation_state_columns(&$variables) {
       // The entity is not managed by the chosen workflow.
       continue;
     }
-    $variables['#cache']['tags'] = array_merge($variables['#cache']['tags'], $entity->getCacheTags());
     $state = $entity->get('moderation_state')->value;
+    if (!array_key_exists($state, $states)) {
+      // This state is hidden.
+      continue;
+    }
+    $variables['#cache']['tags'] = array_merge($variables['#cache']['tags'], $entity->getCacheTags());
+
     $entities[$state][] = render($row);
   }
 
   $variables['json_encoded_content'] = json_encode([
-    'states' => $states,
+    'states' =>  $states,
     'entities' => $entities,
   ]);
 
