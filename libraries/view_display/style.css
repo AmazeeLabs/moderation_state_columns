@@ -8,11 +8,12 @@
 }
 
 .moderation-state-columns--component-container .moderation-state-column {
-  background: #E0E3E7;
+  background: none;
+  border-right: 1px solid rgb(216,216,216);
   flex-basis: 0;
   flex-grow: 1;
-  margin: 0 1em;
-  padding: 1em 1em 0 1em;
+  margin: 2em 0 0 0;
+  padding: 0 1em;
 }
 
 .moderation-state-columns--component-container .moderation-state-column:first-child {
@@ -21,11 +22,14 @@
 
 .moderation-state-columns--component-container .moderation-state-column:last-child {
   margin-right: 0;
+  border-right: none;
 }
 
-.moderation-state-columns--component-container .moderation-state-column h2 {
+.moderation-state-columns--component-container .moderation-state-column > h2 {
   margin: 0 0 1em 0;
-  padding: 0;
+  padding: 0 0 0.5em 0;
+  font-size: 1.538em;
+  border-bottom: rgb(216,216,216) 3px solid;
 }
 
 .moderation-state-columns--component-container .moderation-state-column p {
@@ -34,7 +38,24 @@
 }
 
 .moderation-state-columns--component-container .moderation-state-column--item {
-  border: 1px solid #ffffff;
+  padding: 0;
   margin-bottom: 1em;
+  border: rgb(216,216,216) 1px solid;
+}
+
+.moderation-state-columns--component-container .moderation-state-column--item article.node {
   padding: 1em;
+  background: rgb(245,245,245);
+}
+
+.moderation-state-columns--component-container .moderation-state-column--item article.node:hover {
+  box-shadow: 0 0 25px rgb(216,216,216);
+}
+
+.moderation-state-columns--component-container .moderation-state-column--item article.node h2 a {
+  font-size: 1em;
+}
+
+.moderation-state-columns--component-container .moderation-state-column--item article.node .node__submitted {
+  font-size: 0.8em;
 }

@@ -7,4 +7,4 @@ view_display:
     layout:
       libraries/view_display/style.css: {}
   dependencies:
-  - core/drupal
+    - core/drupal
